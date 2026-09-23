@@ -6,7 +6,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'YOUR_GITHUB_REPOSITORY_URL'
+                    url: 'https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git'
             }
         }
 
@@ -18,26 +18,31 @@ pipeline {
             }
         }
 
-        stage('Deploy to App Server') {
+        stage('Deploy to Target Server') {
             steps {
-                sshagent(['app-server-ssh']) {
+                sshagent(['Target-server-ssh']) {
 
                     sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@APP_SERVER_PRIVATE_IP "
-                            docker rm -f dhanush-app || true
-                        "
+                        echo "Removing old container..."
 
-                        docker save dhanush-devops-app:latest | \
-                        gzip | \
-                        ssh -o StrictHostKeyChecking=no ubuntu@APP_SERVER_PRIVATE_IP \
-                        'gunzip | docker load'
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
+                        "docker rm -f dhanush-app || true"
 
-                        ssh -o StrictHostKeyChecking=no ubuntu@APP_SERVER_PRIVATE_IP "
-                            docker run -d \
-                            --name dhanush-app \
-                            -p 80:80 \
-                            dhanush-devops-app:latest
-                        "
+                        echo "Transferring Docker image..."
+
+                        docker save dhanush-devops-app:latest | gzip | \
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
+                        "gunzip | docker load"
+
+                        echo "Starting new container..."
+
+                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
+                        "docker run -d \
+                        --name dhanush-app \
+                        -p 80:80 \
+                        dhanush-devops-app:latest"
+
+                        echo "Deployment completed!"
                     '''
                 }
             }
