@@ -39,7 +39,7 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
                         "docker run -d \
                         --name dhanush-app \
-                        -p 80:80 \
+                        -p 8080:80 \
                         dhanush-devops-app:latest"
 
                         echo "Deployment completed!"
