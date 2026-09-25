@@ -25,18 +25,18 @@ pipeline {
                     sh '''
                         echo "Removing old container..."
 
-                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
+                        ssh -o StrictHostKeyChecking=no ubuntu@13.232.62.250 \
                         "docker rm -f dhanush-app || true"
 
                         echo "Transferring Docker image..."
 
                         docker save dhanush-devops-app:latest | gzip | \
-                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
+                        ssh -o StrictHostKeyChecking=no ubuntu@13.232.62.250 \
                         "gunzip | docker load"
 
                         echo "Starting new container..."
 
-                        ssh -o StrictHostKeyChecking=no ubuntu@172.31.1.55 \
+                        ssh -o StrictHostKeyChecking=no ubuntu@13.232.62.250 \
                         "docker run -d \
                         --name dhanush-app \
                         -p 8080:80 \
